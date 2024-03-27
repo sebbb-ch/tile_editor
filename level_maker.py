@@ -2,8 +2,10 @@
     # done(kinda): move the grid with wasd
         # could use continuous scroll
     # done: maintain canvas along with palette
-# current objective: A MAP MAKER
     # doing: tile picker from palette
+    # TODO: move the grid
+# current objective: A MAP MAKER
+    # doing: 
 # ========================================================
 # DESIRED FUNCTIONALITY
     # load in tiles from png folder onto the palette
@@ -21,7 +23,7 @@ from pygame.locals import *
 pygame.init()
 WIN_WIDTH = 160 + 48
 WIN_HEIGHT = 144
-WIN_SCALE = 4
+WIN_SCALE = 3
 
 BASE_PATH = './'
 
@@ -53,10 +55,20 @@ dt = frame_end - frame_start
 # ========================================
 tile_palette = load_dir("tiles")
 curr_brush = None
+curr_brush_value = -1
+canvas = {
+    # tile coordinates : tile type in coord
+}
 # ========================================
 while playing:
     frame_start = frame_end
     raw_window.fill((0,0,0))
+
+    mouse_pos = pygame.mouse.get_pos()
+    adjusted_mouse_pos = (
+        math.floor( (mouse_pos[0]) / (16 * WIN_SCALE) ), 
+        math.floor( (mouse_pos[1]) / (16 * WIN_SCALE) )
+        )
 
     for event in pygame.event.get() :
         if event.type == QUIT:
@@ -69,28 +81,39 @@ while playing:
                 # toggle grid drawing
                 draw_grid = not draw_grid
             # we wanna think of holding one of the wasd keys as constantly adding an offset
-            if event.key == K_w : # up
-                y_offset -= 4
-            if event.key == K_a : # left
-                x_offset -= 4
-            if event.key == K_s : # down 
-                y_offset += 4
-            if event.key == K_d : # right
-                x_offset += 4
+            # if event.key == K_w : # up
+            #     y_offset -= 4
+            # if event.key == K_a : # left
+            #     x_offset -= 4
+            # if event.key == K_s : # down 
+            #     y_offset += 4
+            # if event.key == K_d : # right
+            #     x_offset += 4
         if event.type == pygame.MOUSEBUTTONDOWN :
             click_coords = pygame.mouse.get_pos()
             # if click was in the palette
             if click_coords[0] > 160 * WIN_SCALE :
+                print("PALETTE CLICK")
                 if event.button == 1:
                     # turn mouse click coords into tile array index
                     index = math.floor(((click_coords[0] / (WIN_SCALE *16)) - 1) % 3) + 3 * math.floor((click_coords[1] / (WIN_SCALE * 16)))
                     if index < len(tile_palette) :
                         curr_brush = tile_palette[index]
+                        curr_brush_value = index
                     else :
                         curr_brush = None
             # if click coords were in the canvas
-            else : 
-                pass
+            else :
+                print("CANVAS CLICK")
+                if event.button == 1 : 
+                    # take currently selected brush and place it at coords
+                    if curr_brush == None :
+                        # delete current thing if anything
+                        pass
+                    else :
+                        print("added to canvas:", adjusted_mouse_pos, curr_brush_value)
+                        canvas[adjusted_mouse_pos] = curr_brush_value
+                    
             
 
     
@@ -106,31 +129,27 @@ while playing:
         # draw grid lines
         # NOTE: we don't need to adjust for win_scale because we're drawing directly onto the raw surface, which then gets scaled
         for i in range(0, WIN_WIDTH - 48) :
-            if (i - x_offset) % 16 == 0:
-                pygame.draw.line(raw_window, (255, 0, 0), (i, 0), (i, WIN_HEIGHT))
+            if i % 16 == 0:
+                pygame.draw.line(raw_window, (255, 0, 0), (i + x_offset, 0), (i + x_offset, WIN_HEIGHT))
         for i in range(0, WIN_HEIGHT) :
-            if (i - y_offset) % 16 == 0 :
-                pygame.draw.line(raw_window, (255, 0, 0), (0,i), (WIN_WIDTH - 48, i))
+            if i % 16 == 0 :
+                pygame.draw.line(raw_window, (255, 0, 0), (0, i + y_offset), (WIN_WIDTH - 48, i + y_offset))
 
         # get mouse position, normalize it to 16x16 grid, account for offset
-        mouse_pos = pygame.mouse.get_pos()
-        adjusted_mouse_pos = (
-            # again, why the fuckinng * 4
-            math.floor( (mouse_pos[0] ) / (16 * WIN_SCALE) ), 
-            math.floor( (mouse_pos[1] ) / (16 * WIN_SCALE) )
-            )
-        print(adjusted_mouse_pos)
+        
+        # print(adjusted_mouse_pos)
         if curr_brush != None :
-            raw_window.blit(
-                curr_brush, 
-                pygame.Rect(
-                    adjusted_mouse_pos[0] * 16 , 
-                    adjusted_mouse_pos[1] * 16 , 
-                    16 * WIN_SCALE,
-                    16 * WIN_SCALE
-                    )
-            )
+            raw_window.blit(curr_brush, (adjusted_mouse_pos[0] * 16, adjusted_mouse_pos[1] * 16) )
                 
+    # RECALL: idx of this dict is the raw tile coords, capping at (9,8)
+    for idx in canvas.keys() :
+        draw_coords : tuple = tuple(16 * x for x in idx)
+        # print(canvas, draw_coords)
+        # WIN_SCALE comes later (I think)
+        tile = canvas[idx]
+        # print(tile)
+        raw_window.blit(tile_palette[tile], draw_coords)
+    
 
     # ========
     scaled_window = pygame.transform.scale(raw_window, display_window.get_size())
