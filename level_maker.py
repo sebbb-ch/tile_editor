@@ -16,7 +16,7 @@
 # gameboy resolution is 160 x 144
 # 16 x 16 tiles
 # ========================================================
-import pygame, sys, random, os, math
+import pygame, sys, random, os, math, json
 clock = pygame.time.Clock()
 from pygame.locals import *
 
@@ -80,6 +80,12 @@ while playing:
             if event.key == K_g :
                 # toggle grid drawing
                 draw_grid = not draw_grid
+            if event.key == K_e :
+                # export current canvas to json
+                # https://stackoverflow.com/questions/56403013/how-to-save-the-dictionary-that-have-tuple-keys
+                # ISSUE WITH TUPLE KEYS ^^
+                with open("map.json", "w") as outfile:
+                    json.dump(str(canvas), outfile)
             # we wanna think of holding one of the wasd keys as constantly adding an offset
             # if event.key == K_w : # up
             #     y_offset -= 4
