@@ -93,7 +93,7 @@ while playing:
             click_coords = pygame.mouse.get_pos()
             # if click was in the palette
             if click_coords[0] > 160 * WIN_SCALE :
-                print("PALETTE CLICK")
+                # print("PALETTE CLICK")
                 if event.button == 1:
                     # turn mouse click coords into tile array index
                     index = math.floor(((click_coords[0] / (WIN_SCALE *16)) - 1) % 3) + 3 * math.floor((click_coords[1] / (WIN_SCALE * 16)))
@@ -104,16 +104,17 @@ while playing:
                         curr_brush = None
             # if click coords were in the canvas
             else :
-                print("CANVAS CLICK")
+                # print("CANVAS CLICK")
                 if event.button == 1 : 
                     # take currently selected brush and place it at coords
                     if curr_brush == None :
-                        # delete current thing if anything
-                        pass
+                        if adjusted_mouse_pos in canvas.keys() :
+                            canvas.pop(adjusted_mouse_pos)
                     else :
-                        print("added to canvas:", adjusted_mouse_pos, curr_brush_value)
                         canvas[adjusted_mouse_pos] = curr_brush_value
                     
+                    print("click at " + str(adjusted_mouse_pos) + " with value " + str(curr_brush_value))
+                    print("New full canvas: ", canvas)
             
 
     
