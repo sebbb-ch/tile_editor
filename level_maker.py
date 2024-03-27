@@ -104,9 +104,10 @@ while playing:
     # CANVAS ==========================================
     if draw_grid :
         # draw grid lines
+        # NOTE: we don't need to adjust for win_scale because we're drawing directly onto the raw surface, which then gets scaled
         for i in range(0, WIN_WIDTH - 48) :
             if (i - x_offset) % 16 == 0:
-                pygame.draw.line(raw_window, (255, 0, 0), (i * WIN_SCALE,0), (i, WIN_HEIGHT))
+                pygame.draw.line(raw_window, (255, 0, 0), (i, 0), (i, WIN_HEIGHT))
         for i in range(0, WIN_HEIGHT) :
             if (i - y_offset) % 16 == 0 :
                 pygame.draw.line(raw_window, (255, 0, 0), (0,i), (WIN_WIDTH - 48, i))
@@ -114,16 +115,17 @@ while playing:
         # get mouse position, normalize it to 16x16 grid, account for offset
         mouse_pos = pygame.mouse.get_pos()
         adjusted_mouse_pos = (
-            math.floor(( (mouse_pos[0]) / 16) / WIN_SCALE), 
-            math.floor(( (mouse_pos[1]) / 16) / WIN_SCALE)
+            # again, why the fuckinng * 4
+            math.floor( (mouse_pos[0] ) / (16 * WIN_SCALE) ), 
+            math.floor( (mouse_pos[1] ) / (16 * WIN_SCALE) )
             )
         print(adjusted_mouse_pos)
         if curr_brush != None :
             raw_window.blit(
                 curr_brush, 
                 pygame.Rect(
-                    adjusted_mouse_pos[0] * 4 * WIN_SCALE, # why the fuck is this 4 and not 16 lmfao
-                    adjusted_mouse_pos[1] * 4 * WIN_SCALE, # why the fuck is this 4 and not 16 lmfao
+                    adjusted_mouse_pos[0] * 16 , 
+                    adjusted_mouse_pos[1] * 16 , 
                     16 * WIN_SCALE,
                     16 * WIN_SCALE
                     )
