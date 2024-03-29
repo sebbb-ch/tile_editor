@@ -1,22 +1,5 @@
-    # done: infinite grid that i can scroll through with wasd
-    # done(kinda): move the grid with wasd
-        # could use continuous scroll
-    # done: maintain canvas along with palette
-    # doing: tile picker from palette
-    # TODO: move the grid
-    # TODO: load in a map and make edits
-    # TODO: click and drag to place multiple
-# current objective: A MAP MAKER
-    # doing: 
 # ========================================================
-# DESIRED FUNCTIONALITY
-    # load in tiles from png folder onto the palette
-    # click on a tile in palette to select is as brush
-    # when brush is selected, click on canvas to place current selected tile
-    # export created maps onto a file
-# ========================================================
-# gameboy resolution is 160 x 144
-# 16 x 16 tiles
+# gameboy resolution is 160 x 144 with 16 x 16 tiles
 # ========================================================
 import pygame, sys, random, os, math, json
 clock = pygame.time.Clock()
@@ -64,6 +47,9 @@ curr_brush_value = -1
 canvas = {
     # tile coordinates : tile type in coord
 }
+painting = False
+erasing = False
+canvas_buffer = {}
 # ========================================
 while playing:
     frame_start = frame_end
@@ -110,7 +96,7 @@ while playing:
             #     x_offset += 4
         if event.type == pygame.MOUSEBUTTONDOWN :
             click_coords = pygame.mouse.get_pos()
-            # if click was in the palette
+            # PALETTE CLICK
             if click_coords[0] > 160 * WIN_SCALE :
                 # print("PALETTE CLICK")
                 if event.button == 1:
@@ -121,22 +107,43 @@ while playing:
                         curr_brush_value = index
                     else :
                         curr_brush = None
-            # if click coords were in the canvas
+            # CANVAS CLICK
             else :
-                # print("CANVAS CLICK")
                 if event.button == 1 : 
+                    painting = True
                     # take currently selected brush and place it at coords
-                    if curr_brush == None :
-                        if adjusted_mouse_pos in canvas.keys() :
-                            canvas.pop(adjusted_mouse_pos)
-                    else :
-                        canvas[adjusted_mouse_pos] = curr_brush_value
+                    # if curr_brush == None :
+                    #     if adjusted_mouse_pos in canvas.keys() :
+                    #         canvas.pop(adjusted_mouse_pos)
+                    # else :
+                    #     canvas[adjusted_mouse_pos] = curr_brush_value
                     
-                    print("click at " + str(adjusted_mouse_pos) + " with value " + str(curr_brush_value))
-                    print("New full canvas: ", canvas)
-            
+                    # print("click at " + str(adjusted_mouse_pos) + " with value " + str(curr_brush_value))
+                    # print("New full canvas: ", canvas)
+                if event.button == 3 :
+                    erasing = True
+        if event.type == pygame.MOUSEBUTTONUP :
+            if painting :
+                painting = False
+                for key in canvas_buffer.keys() :
+                    if canvas_buffer[key] != -1:
+                        canvas[key] = canvas_buffer[key]
+                canvas_buffer = {}
+            elif erasing :
+                erasing = False
+                for key in canvas_buffer.keys() :
+                    if key in canvas.keys() :
+                        canvas.pop(key)
 
-    
+    if painting and adjusted_mouse_pos not in canvas.keys():
+        if curr_brush == None : 
+            pass
+        else :
+            canvas_buffer[adjusted_mouse_pos] = curr_brush_value
+    elif erasing :
+        canvas_buffer[adjusted_mouse_pos] = -1
+
+
     # PALETTE =========================================
     draw_pos = [0,0]
     for i in range(len(tile_palette)) :
