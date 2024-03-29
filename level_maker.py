@@ -4,6 +4,8 @@
     # done: maintain canvas along with palette
     # doing: tile picker from palette
     # TODO: move the grid
+    # TODO: load in a map and make edits
+    # TODO: export screenshot along with map
 # current objective: A MAP MAKER
     # doing: 
 # ========================================================
@@ -29,6 +31,9 @@ BASE_PATH = './'
 
 display_window = pygame.display.set_mode((WIN_WIDTH * WIN_SCALE, WIN_HEIGHT * WIN_SCALE), 0, 32)
 raw_window = pygame.Surface((WIN_WIDTH,WIN_HEIGHT))
+
+canvas_rect = pygame.Rect(0,0, 160 * WIN_SCALE, 144 * WIN_SCALE)
+subsurf = display_window.subsurface(canvas_rect)
 
 playing = True
 
@@ -82,10 +87,16 @@ while playing:
                 draw_grid = not draw_grid
             if event.key == K_e :
                 # export current canvas to json
+                # Python types that map to JSON keys must be str, int, float, bool or None, only need to figure out how to map to one of those types
                 # https://stackoverflow.com/questions/56403013/how-to-save-the-dictionary-that-have-tuple-keys
                 # ISSUE WITH TUPLE KEYS ^^
+                # better: https://stackoverflow.com/questions/12337583/saving-dictionary-whose-keys-are-tuples-with-json-python/12337657#12337657 
+                pygame.image.save(subsurf, "export.png")
+                push_dict = {str(k): v for (k,v) in canvas.items()}
                 with open("map.json", "w") as outfile:
-                    json.dump(str(canvas), outfile)
+                    json.dump(push_dict, outfile)
+                # with open("map.json", "w") as outfile:
+                #     json.dump(str(canvas), outfile)
             # we wanna think of holding one of the wasd keys as constantly adding an offset
             # if event.key == K_w : # up
             #     y_offset -= 4
