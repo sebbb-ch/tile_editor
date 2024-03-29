@@ -5,7 +5,7 @@
     # doing: tile picker from palette
     # TODO: move the grid
     # TODO: load in a map and make edits
-    # TODO: export screenshot along with map
+    # TODO: click and drag to place multiple
 # current objective: A MAP MAKER
     # doing: 
 # ========================================================
@@ -91,10 +91,12 @@ while playing:
                 # https://stackoverflow.com/questions/56403013/how-to-save-the-dictionary-that-have-tuple-keys
                 # ISSUE WITH TUPLE KEYS ^^
                 # better: https://stackoverflow.com/questions/12337583/saving-dictionary-whose-keys-are-tuples-with-json-python/12337657#12337657 
+                draw_grid = False
                 pygame.image.save(subsurf, "export.png")
                 push_dict = {str(k): v for (k,v) in canvas.items()}
                 with open("map.json", "w") as outfile:
                     json.dump(push_dict, outfile)
+                print("MAP EXPORTED")
                 # with open("map.json", "w") as outfile:
                 #     json.dump(str(canvas), outfile)
             # we wanna think of holding one of the wasd keys as constantly adding an offset
