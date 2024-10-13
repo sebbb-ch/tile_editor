@@ -41,7 +41,7 @@ while playing:
                     # index = (adj_click_coords[0] - 1) % 3 + 3 * adj_click_coords[1]
                     # TRY SUBTRACTING THE ENTIRE CANVAS WIDTH AND THEN CHECKING INSTEAD
 
-                    index = adj_click_coords[0] - (canvas_width / TILE_SIZE) + 3 * adj_click_coords[1]
+                    index = adj_click_coords[0] - int(canvas_width / TILE_SIZE) + 3 * adj_click_coords[1]
                     print(adj_click_coords, index)
                     if index < len(tile_palette) :
                         curr_brush = tile_palette[index]
