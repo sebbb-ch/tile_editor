@@ -4,22 +4,6 @@
 import pygame, sys, random, os, math, json
 clock = pygame.time.Clock()
 from pygame.locals import *
-from tkinter import * 
-import tkinter as tk
-
-# https://stackoverflow.com/questions/23319059/embedding-a-pygame-window-into-a-tkinter-or-wxpython-frame
-pygame.init()
-root = tk.Tk()
-root.title("At Home Map Maker")
-root.geometry("250x170")
-
-label = tk.Label(root, text="Foobar: ")
-label.pack()
-entry = tk.Entry(root)
-entry.pack()
-
-root.mainloop()
-
 
 # DEFAULT VALUES
 TILE_SIZE = 16
@@ -57,8 +41,10 @@ def poll_user() -> None :
     print("Welcome to your own in-house tile editor. You can use this to draw tiles on a grid of a size of your choosing, and then output that as a json file.")
     print("NOTE: CHARACTER INPUT FAILS")
     # POLL FOR TILE SIZE
-    u_tile_size = int(input("Enter tile size: "))
-    if u_tile_size == 8 or u_tile_size == 16 :
+    u_tile_size = input("Enter tile size: ")
+    if not u_tile_size.isnumeric() :
+        print("Invalid tile size - reverting to default of 16")
+    elif u_tile_size == 8 or u_tile_size == 16 :
         TILE_SIZE = u_tile_size
         print(TILE_SIZE)
     else : 

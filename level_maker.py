@@ -1,4 +1,5 @@
 from utils import *
+from textbox import *
 
 playing = True
 
@@ -105,7 +106,6 @@ while playing:
         draw_coords : tuple = tuple(TILE_SIZE * x for x in idx)
         # WIN_SCALE comes later (I think)
         tile = canvas[idx]
-        # print(tile)
         raw_window.blit(tile_palette[tile], draw_coords)
     
 
