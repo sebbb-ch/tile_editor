@@ -4,8 +4,22 @@
 import pygame, sys, random, os, math, json
 clock = pygame.time.Clock()
 from pygame.locals import *
+from tkinter import * 
+import tkinter as tk
 
+# https://stackoverflow.com/questions/23319059/embedding-a-pygame-window-into-a-tkinter-or-wxpython-frame
 pygame.init()
+root = tk.Tk()
+root.title("At Home Map Maker")
+root.geometry("250x170")
+
+label = tk.Label(root, text="Foobar: ")
+label.pack()
+entry = tk.Entry(root)
+entry.pack()
+
+root.mainloop()
+
 
 # DEFAULT VALUES
 TILE_SIZE = 16
@@ -38,6 +52,7 @@ def poll_user() -> None :
     global TILE_SIZE
     global X_TILES
     global Y_TILES
+    skip_y = False
 
     print("Welcome to your own in-house tile editor. You can use this to draw tiles on a grid of a size of your choosing, and then output that as a json file.")
     print("NOTE: CHARACTER INPUT FAILS")
@@ -50,17 +65,27 @@ def poll_user() -> None :
         print("Invalid tile size - reverting to default of 16")
 
     # POLL FOR X AND Y DIMENSIONS
-    u_x_tiles = int(input("Enter the numbe of tiles in the x-axis: "))
-    X_TILES = u_x_tiles
+    print("When inputting x tiles, press enter (blank/invalid) to default to a 10x9 gameboy resolution.")
+    # this feels silly
+    u_x_tiles = input("Enter the number of tiles in the x-axis: ")
+    if not u_x_tiles.isnumeric() :
+        skip_y = True
+        u_x_tiles = 10
+    
+    X_TILES = int(u_x_tiles)
 
-    u_y_tiles = int(input("Enter the numbe of tiles in the y-axis: "))
-    Y_TILES = u_y_tiles
-
-
-    # TODO: ask user for automatic 4:3 ratio given the x dimensions
-
-    # NEXT TODO: ADJUST WIN SIZE FOR TILE SIZE AFTER POLLING FOR IT 
-    # A LITTLE SILLY BUT PROBABLY EASIEST JUST TO HARDCODE IT
+    if not skip_y :
+        print("When inputting y tiles, press enter (blank/invalid) to default to a 4:3 ratio of whatever x-dimensions you inputted.")
+        print("NOTE: gameboy ratio != 4:3")
+        u_y_tiles = input("Enter the number of tiles in the y-axis: ")
+        if not u_y_tiles.isnumeric() :
+            u_y_tiles = math.floor((X_TILES * 3 ) / 4 )
+            print("Defaulting to our calculated 4:3 ratio: ", X_TILES, u_y_tiles)
+        
+        Y_TILES = u_y_tiles 
+    else :
+        print("Defaulting to 10 x 9 dimesions.")
+        Y_TILES = 9
 
 poll_user()
 
@@ -87,7 +112,6 @@ x_offset = 0
 y_offset = 0
 
 # TODO: choose a specific directory to load in from
-# tile_palette = load_dir("tiles-16") if TILE_SIZE == 16 else load_dir("tiles-8")
 tile_palette = load_dir("tiles-16") if TILE_SIZE == 16 else load_dir("tiles-8")
 
 curr_brush = None
