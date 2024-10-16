@@ -31,7 +31,6 @@ class Textbox :
         self.on_screen_text = []
         self.cursor         = pygame.Rect(0, (win_height - char_size - 1), char_size, char_size)
         self.typed_text_raw = ''
-        self.typed_text_img = []
 
         self.display_window     = pygame.display.set_mode((win_width * win_scale, win_height * win_scale), 0, 32)
         self.raw_window         = pygame.Surface((win_width, win_height))
@@ -42,32 +41,46 @@ class Textbox :
         char = pygame.key.name(event.key) 
         if not char.isalnum() : return 
 
-        self.typed_text_raw += char
+        if char == 'space' :
+            self.typed_text_raw += ' '
+        elif char == 'backspace':
+            if len(self.typed_text_raw) > 0 :
+                self.typed_text_raw = self.typed_text_raw[:-1]
+        elif char == 'escape':
+            pass
+        else :
+            self.typed_text_raw += char
+        
         print(self.typed_text_raw)
-        self.text_print(self.typed_text_raw, False, True)
+        self.text_print(self.typed_text_raw)
         
         # based on what is in typed text, decide where to render the cursor
         self.cursor.x = len(self.typed_text_raw) * 4
 
-    def __text_to_img(self, text : str) -> list:
+    def __text_to_img(self, text : str, rgb : tuple = None) -> list:
+        def color_surface(surface : pygame.Surface, rgb : tuple = None) :
+            arr = pygame.surfarray.pixels3d(surface)
+            arr[:,:,0] = rgb[0]
+            arr[:,:,1] = rgb[1]
+            arr[:,:,2] = rgb[2]
+        
         alnum_chars = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9', ' ', '.']
         special_chars = [' ', '.', ',', '>', '<']
         # create a list of pygame surfaces, each of which is a letter in the surface
         utext = text.upper()
         sentence = []
 
-        if len(text) > self.line_length :
-            num_chunks = math.ceil(len(text) / self.line_length)
-            chunk_size = self.line_length
-            for i in range(num_chunks) :
-                chunk = text[i * chunk_size : ((i + 1) * chunk_size)]
-                self.__text_to_img(chunk)
-        else :
-            for c in utext :
-                index = alnum_chars.index(c) if c.isalnum() else special_chars.index(c)
-                sprite_x = index * 4
-                letter_rect = pygame.Rect(sprite_x, 0, 4, 4)
-                letter : pygame.Surface = self.alnum_chars.subsurface(letter_rect) if c.isalnum() else self.special_chars.subsurface(letter_rect)
+        for c in utext :
+            index = alnum_chars.index(c) if c.isalnum() else special_chars.index(c)
+            letter_rect = pygame.Rect(index * 4, 0, 4, 4)
+            letter : pygame.Surface = self.alnum_chars.subsurface(letter_rect) if c.isalnum() else self.special_chars.subsurface(letter_rect)
+            if rgb != None :
+                # consolidate these lines
+                letter.convert_alpha()
+                colored_letter = letter.copy()
+                color_surface(colored_letter, rgb)
+                sentence.append(colored_letter)
+            else :
                 sentence.append(letter)
 
         return sentence
@@ -75,15 +88,7 @@ class Textbox :
 
     # TODO: nicer textwrapping that doesn't break up words
     # MAYBE TODO: COLOR TEXT OR PARTS OF TEXT
-    def text_print(self, text : str, new_line : bool = True, user_text = False) :
-        alnum_chars = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9', ' ', '.']
-        special_chars = [' ', '.', ',', '>', '<']
-        # create a list of pygame surfaces, each of which is a letter in the surface
-        utext = text.upper()
-        if new_line : utext = "> " + utext
-        sentence = []
-
-        # if text is longer than self.window_size[0] then break it up and call textprint on each chunk, else proceed normally
+    def text_print(self, text : str, color : tuple = None) :
         if len(text) > self.line_length :
             num_chunks = math.ceil(len(text) / self.line_length)
             chunk_size = self.line_length
@@ -91,18 +96,11 @@ class Textbox :
                 chunk = text[i * chunk_size : ((i + 1) * chunk_size)]
                 self.text_print(chunk, i == 0)
         else :
-            for c in utext :
-                index = alnum_chars.index(c) if c.isalnum() else special_chars.index(c)
-                sprite_x = index * 4
-                letter_rect = pygame.Rect(sprite_x, 0, 4, 4)
-                letter : pygame.Surface = self.alnum_chars.subsurface(letter_rect) if c.isalnum() else self.special_chars.subsurface(letter_rect)
-                sentence.append(letter)
-            
-            if user_text :
-                print(sentence)
-                self.typed_text_img.append(sentence)
-            else: 
-                self.on_screen_text.append(sentence)
+            imgs = self.__text_to_img(text)
+            self.on_screen_text.append(imgs)
+
+    def text_type(self) :
+        pass
 
     def render(self) :
         # blit console text
@@ -114,8 +112,10 @@ class Textbox :
 
         # blit cursor + user text
         if self.typed_text_raw != '' :
-            for i in range(len(self.typed_text_img[0])) :
-                self.raw_window.blit(self.typed_text_img[0][i], (i * 4, ((self.num_lines) * 4) + (2 * self.num_lines) - 1))        
+            user_sentence = self.__text_to_img(self.typed_text_raw)
+            for i in range(len(user_sentence)) :
+                self.raw_window.blit(user_sentence[i], (i * 4, ((self.num_lines) * 4) + (2 * self.num_lines) - 1))
+
         # TODO: MAKE THE CURSOR BLINK
         pygame.draw.rect(self.raw_window, (255, 0, 0), self.cursor)
 
