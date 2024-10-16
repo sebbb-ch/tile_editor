@@ -1,7 +1,52 @@
-from utils import *
 from textbox import *
 
+user_polling = True
 playing = True
+
+# tbox = Textbox((40, 6))
+# tbox.open()
+# tbox.print("This is an example query")
+# tbox.multiprint(
+#     "This is an example of a query",
+#     "that could span multiple lines",
+#     "though I'm not sure if it's necessary if text wrapping is going be automatic"
+# )
+# # I'd like for the polling to be always on the bottom line and things get pushed up as you enter them
+# # In other words, the bottom line will always be reserved for user input
+# tbox.get()
+# tbox.close()
+# # QUESTION : how are we going to get that data from the textbox over to the main program
+
+tbox = Textbox(60, 10)
+while user_polling :
+    for event in pygame.event.get() :
+        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+            user_polling = False
+        
+        if event.type == KEYDOWN :
+            tbox.handle_type_event(event)
+            if event.key == K_RETURN :
+                print("enter")
+                # TODO: FIX THIS BUG
+                tbox.text_print("I pressed enter") 
+
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.text_print("The five boxing wizards jump quickly.")
+    tbox.render()
+    
+tbox.close()
+
+# this feels like a silly way to do this
+# but i dont wanna deal with window stuff and this makes sure the canvas gets run after the textbox
+from utils import *
 
 # ========================================
 while playing:

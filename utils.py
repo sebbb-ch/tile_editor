@@ -9,6 +9,7 @@ from pygame.locals import *
 TILE_SIZE = 16
 X_TILES = 10
 Y_TILES = 9
+WIN_SCALE = 3 if TILE_SIZE == 16 else 4
 
 # HELPER FUNCTIONS ==========================================
 BASE_PATH = './'
@@ -44,8 +45,8 @@ def poll_user() -> None :
     u_tile_size = input("Enter tile size: ")
     if not u_tile_size.isnumeric() :
         print("Invalid tile size - reverting to default of 16")
-    elif u_tile_size == 8 or u_tile_size == 16 :
-        TILE_SIZE = u_tile_size
+    elif u_tile_size == '8' or u_tile_size == '16' :
+        TILE_SIZE = int(u_tile_size)
         print(TILE_SIZE)
     else : 
         print("Invalid tile size - reverting to default of 16")
@@ -68,22 +69,18 @@ def poll_user() -> None :
             u_y_tiles = math.floor((X_TILES * 3 ) / 4 )
             print("Defaulting to our calculated 4:3 ratio: ", X_TILES, u_y_tiles)
         
-        Y_TILES = u_y_tiles 
+        Y_TILES = int(u_y_tiles) 
     else :
         print("Defaulting to 10 x 9 dimesions.")
         Y_TILES = 9
 
-poll_user()
+# poll_user()
 
 canvas_width = X_TILES * TILE_SIZE
 palette_width = TILE_SIZE * 3
 WIN_WIDTH = canvas_width + palette_width
 
 WIN_HEIGHT = Y_TILES * TILE_SIZE
-
-WIN_SCALE = 3 if TILE_SIZE == 16 else 4
-
-print(TILE_SIZE)
 
 # HELPER DATA ============================================
 display_window = pygame.display.set_mode((WIN_WIDTH * WIN_SCALE, WIN_HEIGHT * WIN_SCALE), 0, 32)
