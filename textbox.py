@@ -35,27 +35,13 @@ class Textbox :
         self.display_window     = pygame.display.set_mode((win_width * win_scale, win_height * win_scale), 0, 32)
         self.raw_window         = pygame.Surface((win_width, win_height))
 
-    # TODO: WHAT ABOUT RETURN KEY
-    def handle_type_event(self, event : pygame.event) :
-        # if a valid key was typed, add it to the typed_text_raw field
-        char = pygame.key.name(event.key) 
-        if not char.isalnum() : return 
-
-        if char == 'space' :
-            self.typed_text_raw += ' '
-        elif char == 'backspace':
-            if len(self.typed_text_raw) > 0 :
-                self.typed_text_raw = self.typed_text_raw[:-1]
-        elif char == 'escape':
-            pass
-        else :
-            self.typed_text_raw += char
-        
-        print(self.typed_text_raw)
-        self.text_print(self.typed_text_raw)
-        
-        # based on what is in typed text, decide where to render the cursor
-        self.cursor.x = len(self.typed_text_raw) * 4
+    # pulled out into it's own function so that we can pop at the end and make space
+    def __update_onscreen_text(self, images : list) -> None :
+        self.on_screen_text.append(images)
+        if len(self.on_screen_text) > self.num_lines :
+            # we're gonna try just popping the last one but this might need to
+            # be a for loop for all extra ones
+            self.on_screen_text.pop(0)
 
     def __text_to_img(self, text : str, rgb : tuple = None) -> list:
         def color_surface(surface : pygame.Surface, rgb : tuple = None) :
@@ -85,9 +71,32 @@ class Textbox :
 
         return sentence
 
+    # TODO: WHAT ABOUT RETURN KEY
+    def handle_type_event(self, event : pygame.event) :
+        # if a valid key was typed, add it to the typed_text_raw field
+        char = pygame.key.name(event.key) 
+        if not char.isalnum() : return 
+
+        if char == 'space' :
+            self.typed_text_raw += ' '
+        elif char == 'backspace':
+            if len(self.typed_text_raw) > 0 :
+                self.typed_text_raw = self.typed_text_raw[:-1]
+        elif char == 'escape':
+            pass
+        elif char == 'return':
+            # NOTE THIS DOESNT WORK BECAUSE OF HOW WE'RE RENDERING
+            self.text_print(self.typed_text_raw)
+            self.typed_text_raw = ''
+        else :
+            self.typed_text_raw += char
+        
+        # based on what is in typed text, decide where to render the cursor
+        self.cursor.x = len(self.typed_text_raw) * 4
 
     # TODO: nicer textwrapping that doesn't break up words
     # MAYBE TODO: COLOR TEXT OR PARTS OF TEXT
+    # TODO: add the >  in the new line of text
     def text_print(self, text : str, color : tuple = None) :
         if len(text) > self.line_length :
             num_chunks = math.ceil(len(text) / self.line_length)
@@ -97,12 +106,12 @@ class Textbox :
                 self.text_print(chunk, i == 0)
         else :
             imgs = self.__text_to_img(text)
-            self.on_screen_text.append(imgs)
-
-    def text_type(self) :
-        pass
+            # self.on_screen_text.append(imgs)
+            self.__update_onscreen_text(imgs)
 
     def render(self) :
+        self.raw_window.fill((0,0,0)) # might need to go in outer loop
+
         # blit console text
         for i in range(len(self.on_screen_text)) :
             sentence = self.on_screen_text[i]
@@ -124,9 +133,7 @@ class Textbox :
         self.display_window.blit(scaled_window, (0,0))
         pygame.display.update()
 
-        # leave ready for next frame
-        self.on_screen_text.clear()
-        self.raw_window.fill((0,0,0)) # might need to go in outer loop
+
 
     def close(self) :
         # closes the textbox window to then open a new one 

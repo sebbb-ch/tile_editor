@@ -17,7 +17,14 @@ playing = True
 # tbox.close()
 # # QUESTION : how are we going to get that data from the textbox over to the main program
 
+# rendering issue is fixed by 1) not clearing the on screen text array every time
+# 2) taking the commands outside the function, and anything inside placing inside of a conditional
+
 tbox = Textbox(40, 20)
+tbox.text_print("The five boxing wizards jump quickly. And this sentence will cause some overflow in the console.")
+tbox.text_print("The five boxing wizards jump quickly.")
+tbox.text_print("The five boxing wizards jump quickly.")
+tbox.text_print("The five boxing wizards jump quickly.")
 while user_polling :
     for event in pygame.event.get() :
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
@@ -25,19 +32,10 @@ while user_polling :
         
         if event.type == KEYDOWN :
             tbox.handle_type_event(event)
-            if event.key == K_RETURN :
-                print("enter")
-                # TODO: FIX THIS BUG
-                tbox.text_print("I pressed enter") 
 
-    tbox.text_print("The five boxing wizards jump quickly. And this sentence will cause some overflow in the console.")
-    tbox.text_print("The five boxing wizards jump quickly.")
-    tbox.text_print("The five boxing wizards jump quickly.")
-    tbox.text_print("The five boxing wizards jump quickly.")
-    tbox.text_print("The five boxing wizards jump quickly.")
-    tbox.text_print("The five boxing wizards jump quickly.")
-    tbox.text_print("The five boxing wizards jump quickly.")
-    tbox.text_print("The five boxing wizards jump quickly.")
+    # i just need the contents of on_screen_text to be rendered every fram
+    # what i dont need is for it to necessarily get updated every frame
+
     tbox.render()
     
 tbox.close()
